@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Wikipedia Viewer</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Music Wikipedia</h1>
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search for music artists, bands, albums...">
+        <button id="searchButton">Search</button>
+      </div>
+    </header>
+    
+    <div class="search-results" id="searchResults"></div>
+    
+    <article class="article-container" id="articleContainer">
+      <h2 id="articleTitle"></h2>
+      <div class="metadata" id="articleMetadata"></div>
+      <div class="article-content" id="articleContent"></div>
+    </article>
+  </div>
+  
+  <script src="./script.js"></script>
+</body>
+</html>

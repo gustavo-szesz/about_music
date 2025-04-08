@@ -2,9 +2,9 @@ export class CreateWikipediaArticleDto {
     title: string;
     url?: string;
     summary?: string;
-    comntent: {
+    content: {
         fullText?: string;
-        formatedSections?: {
+        formattedSections?: {
             title: string;
             content: string;
         }[];

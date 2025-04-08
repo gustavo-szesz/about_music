@@ -2,12 +2,17 @@ import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
+import { WikipediaFormatterService } from './wikipedia_formatter.service';
+import { CreateWikipediaArticleDto } from './dto/create-wikipedia_article.dto';
 
 @Injectable()
 export class WikipediaService {
     private readonly apiBaseUrl = 'https://en.wikipedia.org/w/api.php';
 
-    constructor(private readonly httpService: HttpService) {}
+    constructor(
+        private readonly httpService: HttpService,
+        private readonly wikipediaFormatterService: WikipediaFormatterService
+    ) {}
 
     async searchWikipedia(query: string) {
         const params = {
@@ -72,7 +77,7 @@ export class WikipediaService {
         }
     }
 
-    async getFullArticleText(pageId: number) {
+    async getFullArticleText(pageId: number): Promise<CreateWikipediaArticleDto> {
         const params = {
             action: 'query',
             format: 'json',
@@ -95,10 +100,9 @@ export class WikipediaService {
             );
             
             const page = data.query.pages[pageId];
-            return {
-                title: page.title,
-                fullText: page.extract
-            };
+
+            return this.wikipediaFormatterService.formatArticleText(page.title, page.extract);
+
         } catch (error) {
             throw new HttpException(
                 `Failed to get full article text: ${error.message}`,
