@@ -3,28 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Music Wikipedia Viewer</title>
-  <link rel="stylesheet" href="./style.css">
+  <title>Music Explorer</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Music Wikipedia</h1>
+      <h1>Music Explorer</h1>
+      
       <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search for music artists, bands, albums...">
+        <div class="search-fields">
+          <div class="search-field">
+            <label for="artistInput">Artist</label>
+            <input type="text" id="artistInput" placeholder="Enter artist name">
+          </div>
+          
+          <div class="search-field">
+            <label for="songInput">Song</label>
+            <input type="text" id="songInput" placeholder="Enter song title">
+          </div>
+        </div>
+        
         <button id="searchButton">Search</button>
       </div>
     </header>
-    
-    <div class="search-results" id="searchResults"></div>
-    
-    <article class="article-container" id="articleContainer">
-      <h2 id="articleTitle"></h2>
-      <div class="metadata" id="articleMetadata"></div>
-      <div class="article-content" id="articleContent"></div>
-    </article>
+
+    <main>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="lyrics">Lyrics</button>
+        <button class="tab-btn" data-tab="artist">Artist</button>
+        <button class="tab-btn" data-tab="album">Album</button>
+      </div>
+      
+      <div class="content-area">
+        <div class="tab-content active" id="lyricsTab">
+          <h2 id="songTitle">Search for a song to view lyrics</h2>
+          <div id="lyricsContent" class="lyrics-container"></div>
+        </div>
+        
+        <div class="tab-content" id="artistTab">
+          <h2 id="artistName">Artist Information</h2>
+          <div id="artistContent" class="wiki-container"></div>
+        </div>
+        
+        <div class="tab-content" id="albumTab">
+          <h2 id="albumTitle">Album Information</h2>
+          <div id="albumContent" class="wiki-container"></div>
+        </div>
+      </div>
+    </main>
   </div>
   
-  <script src="./script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
