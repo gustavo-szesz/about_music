@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { WikipediaModule } from './wikipedia/wikipedia.module';
 import { WikipediaFormatterService } from './wikipedia/wikipedia_formatter.service';
 import { HttpModule } from '@nestjs/axios';
+import { LyricsModule } from './lyrics/lyrics.module';
 
 @Module({
-  imports: [WikipediaModule],
+  imports: [WikipediaModule, LyricsModule],
   controllers: [AppController],
   providers: [AppService, WikipediaFormatterService],
 })

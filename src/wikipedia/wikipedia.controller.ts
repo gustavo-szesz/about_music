@@ -11,7 +11,7 @@ export class WikipediaController {
         return this.wikipediaService.searchWikipedia(query);
     }
 
-    @Get('article/:pageId')
+    @Get('article/:pageId') 
     async getArticleDetails(@Param('pageId') pageId: number) {
         return this.wikipediaService.getArticleDetails(pageId);
     }
