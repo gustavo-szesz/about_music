@@ -14,6 +14,28 @@ const albumTitle = document.getElementById('albumTitle');
 const tabButtons = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
 
+// Player Elements
+const audioPlayer = document.getElementById('audioPlayer');
+const playPauseButton = document.getElementById('playPauseButton');
+const prevButton = document.getElementById('prevButton');
+const nextButton = document.getElementById('nextButton');
+const volumeSlider = document.getElementById('volumeSlider');
+const progressFill = document.getElementById('progressFill');
+const currentTimeDisplay = document.getElementById('currentTime');
+const totalTimeDisplay = document.getElementById('totalTime');
+const progressBar = document.querySelector('.progress-bar');
+const playerThumbnail = document.getElementById('playerThumbnail');
+const playerTrackName = document.getElementById('playerTrackName');
+const playerArtistName = document.getElementById('playerArtistName');
+
+// Player State
+let isPlaying = false;
+let currentTrack = null;
+let playlist = [];
+
+// Initialization
+audioPlayer.volume = 0.7; // Initial volume
+
 // Event listeners
 searchButton.addEventListener('click', handleSearch);
 artistInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSearch(); });
@@ -33,7 +55,7 @@ tabButtons.forEach(button => {
 });
 
 // Main search handler
-async function handleSearch() {
+function handleSearch() {
   const artist = artistInput.value.trim();
   const song = songInput.value.trim();
   
@@ -70,6 +92,11 @@ async function handleSearch() {
   // Search for album info if song is provided (try to find album from song)
   if (song) {
     findAlbumForSong(artist, song);
+  }
+
+  // Search and play YouTube music
+  if (artist && song) {
+    searchAndPlayYouTube(artist, song);
   }
 }
 
@@ -273,4 +300,163 @@ function sanitizeHTML(text) {
   const element = document.createElement('div');
   element.textContent = text;
   return element.innerHTML;
+}
+
+// Functions to control the player
+function playAudio(videoId, trackInfo) {
+  // Update the audio player URL to point to our streaming endpoint
+  audioPlayer.src = `http://localhost:3000/youtube-audio/stream?videoId=${videoId}`;
+  
+  // Update track information
+  if (trackInfo) {
+    playerTrackName.textContent = trackInfo.title || 'Unknown Track';
+    playerArtistName.textContent = trackInfo.artist || 'Unknown Artist';
+    
+    // Update thumbnail if available
+    if (trackInfo.thumbnail) {
+      playerThumbnail.src = trackInfo.thumbnail;
+    } else {
+      // Use a placeholder image if no thumbnail is available
+      playerThumbnail.src = 'assets/placeholder.jpg';
+    }
+    
+    // Add to playlist if not already present
+    if (!playlist.some(track => track.videoId === videoId)) {
+      playlist.push({
+        videoId,
+        ...trackInfo
+      });
+    }
+    
+    currentTrack = videoId;
+  }
+  
+  // Play the track and update the button
+  audioPlayer.play()
+    .then(() => {
+      isPlaying = true;
+      playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+    })
+    .catch(error => {
+      console.error('Error playing audio:', error);
+    });
+}
+
+// Function to get YouTube video ID
+async function getYouTubeVideoId(artist, song) {
+  try {
+    // Fazendo uma requisição para um endpoint hipotético em seu backend
+    const response = await fetch(`http://localhost:3000/youtube-search?q=${encodeURIComponent(artist + ' ' + song)}`);
+    const data = await response.json();
+    
+    if (data && data.videoId) {
+      return data.videoId;
+    } else {
+      console.error('Nenhum vídeo encontrado');
+      return null;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar ID do vídeo:', error);
+    return null;
+  }
+}
+
+// Function to search and play YouTube music
+async function searchAndPlayYouTube(artist, song) {
+  // Mostrar estado de carregamento
+  playerTrackName.textContent = 'Carregando...';
+  playerArtistName.textContent = `${song} - ${artist}`;
+  
+  // Buscar o ID do vídeo
+  const videoId = await getYouTubeVideoId(artist, song);
+  
+  if (videoId) {
+    playAudio(videoId, {
+      title: song,
+      artist: artist,
+      thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+    });
+  } else {
+    // Fallback para uma pesquisa direta do YouTube
+    const searchQuery = `${artist} ${song} official audio`;
+    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;
+    
+    console.log('Não foi possível encontrar o vídeo automaticamente');
+    console.log('Tente buscar manualmente:', searchUrl);
+    
+    // Informe ao usuário
+    playerTrackName.textContent = 'Não foi possível encontrar esta música';
+    playerArtistName.textContent = 'Tente uma busca diferente';
+  }
+}
+
+// Player events
+playPauseButton.addEventListener('click', () => {
+  if (isPlaying) {
+    audioPlayer.pause();
+    playPauseButton.innerHTML = '<i class="fas fa-play"></i>';
+    isPlaying = false;
+  } else {
+    audioPlayer.play();
+    playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+    isPlaying = true;
+  }
+});
+
+// Volume control
+volumeSlider.addEventListener('input', () => {
+  audioPlayer.volume = volumeSlider.value;
+});
+
+// Progress bar update
+audioPlayer.addEventListener('timeupdate', () => {
+  // Update progress bar fill
+  const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+  progressFill.style.width = `${percentage}%`;
+  
+  // Update current time
+  currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
+  
+  // Update total time if available
+  if (!isNaN(audioPlayer.duration)) {
+    totalTimeDisplay.textContent = formatTime(audioPlayer.duration);
+  }
+});
+
+// Format time in minutes:seconds
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+}
+
+// Allow clicking on progress bar to navigate the track
+progressBar.addEventListener('click', (e) => {
+  const rect = progressBar.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  audioPlayer.currentTime = ratio * audioPlayer.duration;
+});
+
+// Previous and next buttons
+prevButton.addEventListener('click', playPrevious);
+nextButton.addEventListener('click', playNext);
+
+function playPrevious() {
+  if (!currentTrack || playlist.length <= 1) return;
+  
+  const currentIndex = playlist.findIndex(track => track.videoId === currentTrack);
+  const prevIndex = currentIndex > 0 ? currentIndex - 1 : playlist.length - 1;
+  
+  const prevTrack = playlist[prevIndex];
+  playAudio(prevTrack.videoId, prevTrack);
+}
+
+function playNext() {
+  if (!currentTrack || playlist.length <= 1) return;
+  
+  const currentIndex = playlist.findIndex(track => track.videoId === currentTrack);
+  const nextIndex = currentIndex < playlist.length - 1 ? currentIndex + 1 : 0;
+  
+  const nextTrack = playlist[nextIndex];
+  playAudio(nextTrack.videoId, nextTrack);
 }

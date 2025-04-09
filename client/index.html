@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Music Explorer</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
   <div class="container">
@@ -53,6 +54,39 @@
       </div>
     </main>
   </div>
+  
+  <footer class="audio-footer" id="audioFooter">
+    <div class="player-container">
+      <div class="player-info">
+        <img id="playerThumbnail" src="assets/placeholder.jpg" alt="Capa do álbum">
+        <div class="track-info">
+          <p id="playerTrackName">Nenhuma música selecionada</p>
+          <p id="playerArtistName" class="artist-name">Escolha uma música para começar</p>
+        </div>
+      </div>
+      
+      <div class="player-controls">
+        <button id="prevButton" class="control-button"><i class="fas fa-step-backward"></i></button>
+        <button id="playPauseButton" class="control-button play-pause"><i class="fas fa-play"></i></button>
+        <button id="nextButton" class="control-button"><i class="fas fa-step-forward"></i></button>
+      </div>
+      
+      <div class="player-progress">
+        <span id="currentTime">0:00</span>
+        <div class="progress-bar">
+          <div id="progressFill"></div>
+        </div>
+        <span id="totalTime">0:00</span>
+      </div>
+      
+      <div class="player-volume">
+        <i class="fas fa-volume-up"></i>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.7">
+      </div>
+      
+      <audio id="audioPlayer"></audio>
+    </div>
+  </footer>
   
   <script src="script.js"></script>
 </body>
